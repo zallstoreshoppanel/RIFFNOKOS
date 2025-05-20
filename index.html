@@ -1,0 +1,308 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>RIFF NOKOS</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #101820;
+      color: #f1f1f1;
+      overflow-x: hidden;
+    }
+    #loader {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #101820;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 1000;
+    }
+    .spinner {
+      border: 6px solid #333;
+      border-top: 6px solid #00f7ff;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    #mainContent {
+      display: none;
+      padding: 20px;
+      text-align: center;
+      opacity: 0;
+      animation: fadeInUp 1s ease forwards;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      color: #00f7ff;
+      text-shadow: 0 0 10px #00f7ff;
+    }
+    select, button {
+      padding: 12px;
+      margin: 10px;
+      font-size: 1em;
+      border: none;
+      border-radius: 8px;
+      outline: none;
+      background: #222;
+      color: #fff;
+      box-shadow: 0 0 5px #00f7ff;
+      transition: all 0.3s ease;
+    }
+    button:hover, select:hover {
+      background: #333;
+    }
+    #numbers {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 30px;
+    }
+    .number {
+      background: #121212;
+      padding: 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.3s, background 0.3s;
+      box-shadow: 0 0 10px rgba(0, 255, 200, 0.2);
+      animation: fadeIn 0.6s ease-in-out;
+    }
+    .number:hover {
+      background: #1e1e1e;
+      transform: scale(1.05);
+    }
+    .otp {
+      margin-top: 12px;
+      font-size: 1.3em;
+      color: #00ffcc;
+    }
+    .progress-bar {
+      margin-top: 10px;
+      width: 100%;
+      height: 8px;
+      background: #333;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .progress {
+      height: 100%;
+      width: 0%;
+      background: #00ffcc;
+      animation: progressAnim 120s linear forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes progressAnim {
+      from { width: 0%; }
+      to { width: 100%; }
+    }
+    #footer {
+      margin-top: 50px;
+      font-size: 0.9em;
+      color: #ccc;
+    }
+    @media(max-width: 600px) {
+      h1 { font-size: 2em; }
+      select, button { width: 100%; }
+    }
+    
+    #limitPopup {
+      display: none;
+      position: fixed;
+      z-index: 9999;
+      background: #1a1a1a;
+      color: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #00ffcc;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    #limitPopup h2 {
+      color: #00f7ff;
+  </style>
+</head>
+<body> <div id="loader">
+    <div class="spinner"></div>
+    <p style="margin-top: 20px; color: #00f7ff; font-size: 1.2em;">Memuat halaman RIFF NOKOS...</p>
+  </div>
+
+  <div id="mainContent">
+    <h1>RIFF NOKOS</h1>
+    <p>Pilih Negara dan Aplikasi, lalu klik Generate</p>
+
+    <select id="country">
+      <option value="62">Indonesia (+62)</option>
+      <option value="1">USA (+1)</option>
+      <option value="91">India (+91)</option>
+      <option value="44">UK (+44)</option>
+      <option value="81">Japan (+81)</option>
+    </select>
+
+    <select id="app">
+      <option value="whatsapp">WhatsApp</option>
+    </select>
+
+    <button onclick="generateNumbers()">Generate Nomor</button>
+    <div id="numbers"></div>
+
+    <div id="footer">&copy; 2025 RIFF NOKOS. All rights reserved.</div>
+  </div>
+
+  <!-- Popup Limit -->
+  <div id="limitPopup">
+    <h2>Limit Harian Tercapai</h2>
+    <p>Anda telah mencapai batas 2 OTP hari ini.</p>
+    <p>Tunggu hingga <span id="countdown"></span> untuk menggunakan lagi.</p>
+  </div>
+
+
+<!-- Semua struktur awal tetap. Ganti script <script> bagian bawah dengan yang ini: -->
+<script>
+  window.onload = () => {
+    setTimeout(() => {
+      document.getElementById("loader").style.display = "none";
+      const content = document.getElementById("mainContent");
+      content.style.display = "block";
+      setTimeout(() => content.style.opacity = 1, 100);
+    }, 3000);
+  };
+
+  function generateRandomNumber(length) {
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += Math.floor(Math.random() * 10);
+    }
+    return result;
+  }
+
+  function generateIndoNumber() {
+    const prefixes = ['838', '852', '853', '857', '858', '859', '878', '879', '821', '822', '823'];
+    const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+    return `+62${prefix}${generateRandomNumber(7)}`;
+  }
+
+  function generateOTP() {
+    return generateRandomNumber(6);
+  }
+
+  let otpInProgress = false;
+
+  function getTodayKey() {
+    const now = new Date();
+    return `otpLimit-${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+  }
+
+  function getLimitUsed() {
+    const key = getTodayKey();
+    return parseInt(localStorage.getItem(key) || '0');
+  }
+
+  function increaseLimitUsed() {
+    const key = getTodayKey();
+    let used = getLimitUsed();
+    localStorage.setItem(key, used + 1);
+  }
+
+  function isLimitExceeded() {
+    return getLimitUsed() >= 2;
+  }
+
+  function showLimitPopup() {
+    const popup = document.getElementById("limitPopup");
+    popup.style.display = "block";
+
+    const countdown = document.getElementById("countdown");
+    const now = new Date();
+    const reset = new Date();
+    reset.setHours(24, 0, 0, 0);
+
+    function updateCountdown() {
+      const diff = reset - new Date();
+      if (diff <= 0) {
+        popup.style.display = "none";
+        return;
+      }
+      const hours = String(Math.floor(diff / 3600000)).padStart(2, '0');
+      const minutes = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+      const seconds = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+      countdown.textContent = `${hours}:${minutes}:${seconds}`;
+    }
+
+    updateCountdown();
+    setInterval(updateCountdown, 1000);
+  }
+
+  function generateNumbers() {
+    if (otpInProgress) return;
+
+    const countryCode = document.getElementById("country").value;
+    const numbersDiv = document.getElementById("numbers");
+    numbersDiv.innerHTML = "";
+
+    for (let i = 0; i < 10; i++) {
+      let number = countryCode === "62" ? generateIndoNumber() : `+${countryCode}${generateRandomNumber(10)}`;
+      const div = document.createElement("div");
+      div.className = "number";
+      div.textContent = number;
+
+      div.onclick = () => {
+        if (otpInProgress || isLimitExceeded()) {
+          showLimitPopup();
+          return;
+        }
+
+        otpInProgress = true;
+        increaseLimitUsed();
+
+        document.querySelectorAll('.number').forEach(el => {
+          if (el !== div) {
+            el.style.pointerEvents = "none";
+            el.style.opacity = 0.4;
+          }
+        });
+
+        div.innerHTML = `<div>${number}<br><small>Memproses OTP (2 menit)...</small></div><div class='progress-bar'><div class='progress'></div></div>`;
+        navigator.clipboard.writeText(number);
+
+        setTimeout(() => {
+          const otp = generateOTP();
+          div.innerHTML = `${number}<br><div class='otp'>Kode OTP: <b>${otp}</b></div>`;
+          otpInProgress = false;
+
+          document.querySelectorAll('.number').forEach(el => {
+            el.style.pointerEvents = "auto";
+            el.style.opacity = 1;
+          });
+        }, 120000);
+      };
+
+      numbersDiv.appendChild(div);
+    }
+  }
+</script>
+
+  </div>  </body>
+</html>
